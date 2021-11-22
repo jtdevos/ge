@@ -1,0 +1,18 @@
+~/d/ge ❯❯❯ find . -type f -name *.CPP -exec wc {} \;
+      90     280    2444 ./register/REG2.CPP
+      91     281    2455 ./register/REG3.CPP
+      76     276    2542 ./register/REGISTER.CPP
+~/d/ge ❯❯❯ find . -type f -name *.C -exec wc {} \;
+     838    2200   20338 ./mbmgemp/GECYBS.C
+    1102    2337   21921 ./mbmgemp/MBMGEGRF.C
+     569    1491   14461 ./mbmgemp/GEDROIDS.C
+     448    1354   11341 ./mbmgemp/SECURE.C
+    3667    7299   73420 ./mbmgemp/GEMAIN.C
+     873    2282   22660 ./mbmgemp/GEPLANET.C
+     517    1354   13297 ./mbmgemp/GESAMPLE.C
+    2685    5667   56611 ./mbmgemp/GEFUNCS.C
+     347     908    9315 ./mbmgemp/GELIB.C
+    6165   11063  115401 ./mbmgemp/GECMDS.C
+     902    2187   22153 ./mbmgemap/MBMGEMAP.C
+    1066    2573   27173 ./mbmgecvt/MBMGECVT.C
+    
