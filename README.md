@@ -43,6 +43,40 @@ as it goes. The approach so far:
 that the repository itself is all the context anyone (human or AI)
 needs to continue the work.
 
+## Next steps
+
+Candidate topics for upcoming sessions, roughly in dependency order —
+though this is an exploration, so any of these could be picked up (or
+abandoned) next:
+
+- **Firing side of combat** — lock-on rolls, phasers/hyper-phasers,
+  torpedo/missile launch, mines, zippers. The *receiving* side is
+  already in the sim; this makes ships dangerous
+  ([spec](docs/spec/combat.md)).
+- **Kill rewards** — the original `killem()` flow: loot transfer,
+  score award/deduction, cash transfer, planet-map capture
+  ([spec](docs/spec/combat.md)).
+- **Scanning and reports** — `sca`/`rep`/`nav`, the first real
+  consumers of sim queries and the contact-letter table that firing
+  commands target by.
+- **Session layer** — command parser + line-mode renderer, first over
+  stdin (playable single-player smoke test), then over SSH via
+  AsyncSSH with public-key identity.
+- **Message text extraction** — pull the original's voice (prompts,
+  combat messages, taunts) out of `MBMGEMSG.MSG` so events render as
+  the real thing; later, the ANSI screens in `MBMGEGRF.C`.
+- **Persistence** — SQLite schema mapped from the original's Btrieve
+  files ([spec](docs/spec/meta.md)); save/load the world between runs.
+- **Planet economy tick** — production, food/starvation, revolts,
+  spies; the offline-empire half of the game
+  ([spec](docs/spec/economy.md)).
+- **Cyborg AI** — the spawner and cybertron hunt/attack state machine;
+  makes the universe hostile without other players
+  ([spec](docs/spec/cyborgs.md)).
+- **Retro client experiments** — point cool-retro-term at the SSH
+  server for the green-phosphor feel; longer-term, a custom
+  terminal-wrapper client (CRT shader, Alien-cockpit chrome).
+
 ## Running what exists
 
 Requires Python ≥ 3.11. No runtime dependencies; pytest for tests.
