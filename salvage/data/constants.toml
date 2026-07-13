@@ -1,0 +1,119 @@
+# Hardcoded balance constants salvaged verbatim from mbmgemp/GEMAIN.H
+# (Galactic Empire 3.2). The original carries this warning:
+#
+#   "The following defines have been carefully chosen and refined to
+#    provide a well balanced and entertaining game play. Should they be
+#    modified, do so with caution and consideration."
+#
+# Unlike config.toml (sysop-tunable at runtime), these were compiled in.
+# Names kept as in the C source; comments are the original ones.
+# NOTE: many rates are per-tick and assume the tick cadence in [ticks].
+
+[ticks]
+TICKTIME = 6        # how often does RTKICK fire (seconds) - main ship tick
+TICKTIME2 = 1       # how often does RTKICK fire - fast tick
+CYBTICKTIME = 6     # Cyborgs do stuff this fast
+PLANTIME = 55       # how often do planets get updated (recomputed at boot
+                    # from PLANTOCK config and sector count; min 4)
+FIRETICKS = 10      # how many ticks to hold a player when involved in battle
+DECOYTIME = 15      # times TICKTIME: how long a decoy lives
+COUNTDOWN = 20      # self destruct countdown
+CYBMAXPERTICK = 2   # the number of cybs processed each tick
+QUADMAXPERTICK = 5  # the number of quads processed each tick
+
+[movement]
+ROTENGUSE = 30      # Energy used to rotate
+ROTAMT = 20         # Amount of degrees rotation each tick
+ACCENGAMT = 120     # Acceleration energy usage
+MOVENGMIN = 3000    # minimum energy to move
+MOVENGUSE = 10      # energy used moving
+TELEDAM = 17        # amount of damage done when edge (of universe) reached
+
+[energy]
+ENGYMAX = 65000     # Maximum energy one can have
+ENGRECHG = 1        # Energy recharge amount / tick
+ENGYMIN = 5000      # Minimum Energy in FLUX to autoload
+
+[phasers]
+PRELOAD = 10        # Phasor reload rate / tick
+PMINFIRE = 60       # Minimum amount to fire phasor
+PENGUSE = 57        # Amount of energy used by phasors charging
+PMINENG = 500       # minimum energy to fire
+PHABIAS = 2         # Degrees to bias "spread" to better aim
+
+[hyper_phasers]
+HPMINFIR = 6000     # Minimum energy in flux to fire Hyper phaser
+HPFIRAMT = 5000     # energy consumed per hyper-phaser shot
+HPBEAMW = 5         # beam width (degrees)
+
+[shields]
+SHMINPWR = 200      # Minimum power for shields
+SHENGUSE = 100      # Energy used every tick for shields
+SHHITENG = 1000     # Energy drained when hit
+SHMAXCHG = 10       # Max (full) charge in the shields
+SHMINCHG = 5        # Minimum charge to be effective
+SHIELD_FACTOR = 4   # per-mark reduction of shield knock: a hit knocks
+                    # (80 - mark*4) * dam% off the shield charge
+
+[scanners]
+SCANADJ = 40        # Adjustment factor for range scanner
+HYSCANRANGE = 5     # how far does the hyper scanner look (sectors)
+
+[universe]
+MAXPLANETS = 9      # max planetary objects per sector
+MAXX = 30           # scan map width (chars)
+MAXY = 15           # scan map height (chars)
+NEUTRAL_X = 0       # sector 0,0 is neutral space (home of the Zygorian
+NEUTRAL_Y = 0       # shipyards; hostile acts penalized there)
+
+[weapons_limits]
+MAXTORPS = 3        # do not change: affects structure sizes
+MAXMISSL = 3        # do not change: affects structure sizes
+MAXDECOY = 10       # do not change: affects structure sizes
+NUM_MINES = 20      # 20 mines in the game max (per player, see config)
+MINERANGE = 10000   # maximum Mine range
+DESTRUCTRANGE = 10000  # blast radius of self destruct
+
+[cargo]
+TONFACT = 15000.0   # divisor for ton factor (speed penalty from cargo)
+
+[cyborgs]
+CYB_GO_WARP = 1     # cyb warp behavior flag
+CYB_MINCLASS = 3    # Minimum class a Cybertron will pick on
+CYBSLO = 3          # slows down the cyborgs reaction time
+CYB_ALLOW = 35      # how much allowance per tick
+CYB_MAXCASH = 2000000   # maximum cash cybertrons can hold
+CYB_BE_NICE = 30    # 30 kills grace before we get tough
+CYB_BE_EASY = 60    # 60 kills till we get really mean
+CYB_BREAKOFF = 500  # 1 in x chance that cyb will break off attack
+CYB_MINDAM = 75     # % of damage when cyb jams and mines
+CYBS_FIGHT = false  # true if Cybs fight each other
+CYB_BADBAD = false  # true if cybs attack anyone once fired upon;
+                    # false if they only attack their attacker
+
+[misc]
+SSMAX = 10000       # max sub-space (radio) range factor
+SHOWDOC = true      # captured planet map shown to battle victor
+RNDDOC = 6          # 1 in x odds of capturing the planet map
+TOPSHIELD = 19      # number of shield marks
+TOPPHASOR = 19      # number of phaser marks
+MAXTEAMS = 50       # max teams in game
+BEACONMSGSZ = 75    # beacon message length
+SNMSIZ = 25         # ship name size
+
+[item_indexes]
+# order of the 14 item slots everywhere in the game
+men = 0
+missiles = 1
+torpedoes = 2
+ion_cannons = 3
+flux_pods = 4
+food = 5
+fighters = 6
+decoys = 7
+troops = 8
+zippers = 9
+jammers = 10
+mines = 11
+gold = 12
+spies = 13
