@@ -1,8 +1,8 @@
 """Simulation core and tick loop.
 
 Faithful port of the original's real-time handlers (see
-salvage/spec/universe.md and combat.md for the mechanics, and
-salvage/README.md for the cadence model):
+docs/spec/universe.md and combat.md for the mechanics, and
+docs/salvage.md for the cadence model):
 
     warrti2 (1 s)  -> Sim.tick(): rotation, acceleration, movement,
                       self-destruct; each ship processed every 3rd tick

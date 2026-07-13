@@ -19,15 +19,19 @@ beats scalability.
   Other original-era directories: `mbmgemap/` (sysop map utility),
   `mbmgecvt/` (DB converter), `register/` (shareware registration —
   irrelevant).
-- `salvage/` — **ground truth for the remake**, extracted from the
-  original. `salvage/spec/*.md` documents the mechanics with
-  file-level provenance; `salvage/data/*.toml` holds the game's
-  numbers (ship classes, 244 config options, balance constants).
-  Start at `salvage/README.md`. When remake behavior is in question,
-  the spec wins; when the spec is in question, the C source wins —
-  and the spec should be corrected in the same change.
-- Remake code (Python) lives at the top level as it grows (planned:
-  `ge/` package for the sim + server).
+- `docs/` — remake documentation: `docs/architecture.md` (design,
+  status, roadmap), `docs/salvage.md` (extraction notes, original's
+  runtime model, known quirks), `docs/spec/*.md` (mechanics reference
+  with file-level provenance). Start at `docs/README.md`.
+- `salvage/data/*.toml` — **ground truth numbers** (ship classes,
+  config options, balance constants), loaded by the remake at runtime;
+  `salvage/tools/` regenerates them from the `.MSG` files.
+  When remake behavior is in question, the spec wins; when the spec is
+  in question, the C source wins — and the spec should be corrected in
+  the same change.
+- `ge/` — the remake: deterministic Python sim core (tick loop,
+  movement/energy/shields/incoming-ordnance so far). `tests/` covers
+  it. Session/SSH layers do not exist yet.
 
 ## Remake architecture decisions (agreed with the owner)
 
@@ -51,8 +55,8 @@ beats scalability.
 ## The original's tick model (must be preserved)
 
 Balance constants are tuned to these cadences — port numbers and
-cadences together (details in `salvage/spec/universe.md` and
-`salvage/README.md`):
+cadences together (details in `docs/spec/universe.md` and
+`docs/salvage.md`):
 
 - **1 s**: rotation, acceleration, movement (each ship processed every
   3rd tick), self-destruct countdown; NPC spawn/AI dispatch.

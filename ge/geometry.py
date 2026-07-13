@@ -1,6 +1,6 @@
 """Geometry: port of GELIB.C and the coord1/coord2 helpers in GECMDS.C.
 
-Coordinate system (see salvage/spec/universe.md):
+Coordinate system (see docs/spec/universe.md):
 1.0 coordinate unit = one sector. Heading 0 = north (-y), 90 = east
 (+x); a ship at heading h moves along (sin h, -cos h).
 """

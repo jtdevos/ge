@@ -3,7 +3,7 @@
 Sectors exist only once something needs them. Generating a wormhole
 also generates its destination sector (with wormhole creation
 suppressed there to prevent cascades) and back-links a return wormhole
-if the destination has a free slot. See salvage/spec/universe.md.
+if the destination has a free slot. See docs/spec/universe.md.
 """
 
 from __future__ import annotations
