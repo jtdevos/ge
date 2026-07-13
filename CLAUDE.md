@@ -79,9 +79,10 @@ through the injected `Random`. Tests hand-seed empty sectors around
 the test area so lazy universe generation can't drop a planet under a
 moving ship.
 
-## Licensing caveat
+## Licensing
 
-The repo `README.md` says Apache 2.0, but every original source header
-and `mbmgemp/README.TXT` says **GPL v2**. Unresolved. Flag this when
-relevant (e.g. before publishing derived code); don't silently assert
-either license in new files.
+The project is **GPL v2 or later**, matching the original author's
+grant (source headers and `mbmgemp/README.TXT`). The remake code is a
+derivative work and stays GPL v2+; don't introduce dependencies or
+copied code with incompatible licenses. (An earlier Apache 2.0 label
+from the SourceForge→GitHub mirror was corrected in July 2026.)
