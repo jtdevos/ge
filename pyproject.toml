@@ -1,0 +1,19 @@
+[project]
+name = "ge"
+version = "0.1.0"
+description = "Modern remake of Galactic Empire, the MajorBBS door game"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ge"]

@@ -65,15 +65,19 @@ cadences together (details in `salvage/spec/universe.md` and
 
 ## Commands
 
-No build/test infrastructure exists yet for the remake. Currently
-useful:
+- Tests: `.venv/bin/python -m pytest -q` (create the venv with
+  `python3 -m venv .venv && .venv/bin/pip install pytest`). Single
+  test: `.venv/bin/python -m pytest tests/test_movement.py -k warp -q`.
+- Watch the sim run: `.venv/bin/python -m ge.demo [seed]`.
+- Regenerate extracted data after fixing an extractor:
+  `python3 salvage/tools/extract_ships.py` /
+  `python3 salvage/tools/extract_config.py`.
 
-- Validate the extracted data files:
-  `python3 -c "import tomllib,glob; [tomllib.load(open(f,'rb')) for f in glob.glob('salvage/data/*.toml')]"`
-- `ships.toml`/`config.toml` were generated mechanically from
-  `mbmgemp/MBMGESHP.MSG` / `MBMGEMSG.MSG`; if they need regeneration,
-  the parsers are ~60-line scripts described in `salvage/README.md`
-  (single-line `.MSG` option entries: `NAME {prompt: default} TYPE range`).
+The sim core (`ge/sim.py`) is synchronous and deterministic — no
+asyncio, no I/O; `Sim.tick()` is one game second, all randomness goes
+through the injected `Random`. Tests hand-seed empty sectors around
+the test area so lazy universe generation can't drop a planet under a
+moving ship.
 
 ## Licensing caveat
 
