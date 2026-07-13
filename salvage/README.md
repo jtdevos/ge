@@ -20,9 +20,9 @@ behavior can be checked against it.
 | `constants.toml` | `GEMAIN.H` | The compiled-in balance constants ("carefully chosen and refined… modify with caution") |
 
 `ships.toml` and `config.toml` are generated mechanically from the
-`.MSG` files (parser scripts are trivial to re-run; values were
-validated with `tomllib`). `constants.toml` was transcribed by hand
-with the original comments.
+`.MSG` files by the scripts in `tools/` (`python3 tools/extract_ships.py`,
+`python3 tools/extract_config.py`; values validated with `tomllib`).
+`constants.toml` was transcribed by hand with the original comments.
 
 ### `spec/` — mechanics documentation
 

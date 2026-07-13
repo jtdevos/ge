@@ -124,6 +124,100 @@ mark_17 = 60000000  # Price for Mark-17 phasers (range 0-201288837)
 mark_18 = 100000000  # Price for Mark-18 phasers (range 0-201288837)
 mark_19 = 200000000  # Price for Mark-19 phasers (range 0-201288837)
 
+# Neutral sector (0,0) fixed planets. type: 1 = Zygor shipyard
+# stock, 2 = station (men/troops/food), 3 = wormhole, 0 = plain.
+# x/y are position within the sector (0-9999).
+
+[neutral_sector.planet_1]
+name = "Zygor"
+owner = "*EMPIRE*"
+type = 1
+x = 5000
+y = 5000
+environment = 3
+resource = 3
+defined = true
+
+[neutral_sector.planet_2]
+name = "Tahanian Station"
+owner = "*EMPIRE*"
+type = 2
+x = 7000
+y = 7000
+environment = 3
+resource = 3
+defined = true
+
+[neutral_sector.planet_3]
+name = "Enforcer Planet"
+owner = "*EMPIRE*"
+type = 0
+x = 2000
+y = 2000
+environment = 1
+resource = 0
+defined = true
+
+[neutral_sector.planet_4]
+name = "Kayriez Portal"
+owner = "*EMPIRE*"
+type = 3
+x = 1100
+y = 6700
+environment = 0
+resource = 0
+defined = true
+
+[neutral_sector.planet_5]
+name = "Lydorian Portal"
+owner = "*EMPIRE*"
+type = 3
+x = 6700
+y = 1500
+environment = 0
+resource = 0
+defined = true
+
+[neutral_sector.planet_6]
+name = "Tryklon Portal"
+owner = "*EMPIRE*"
+type = 3
+x = 5500
+y = 7800
+environment = 0
+resource = 0
+defined = true
+
+[neutral_sector.planet_7]
+name = "Planet 7"
+owner = "*EMPIRE*"
+type = 0
+x = 2050
+y = 2500
+environment = 1
+resource = 0
+defined = false
+
+[neutral_sector.planet_8]
+name = "Planet 8"
+owner = "*EMPIRE*"
+type = 0
+x = 2000
+y = 2000
+environment = 1
+resource = 0
+defined = false
+
+[neutral_sector.planet_9]
+name = "Planet 9"
+owner = "*EMPIRE*"
+type = 0
+x = 2000
+y = 2000
+environment = 1
+resource = 0
+defined = false
+
 [general]
 PLAYKEY = "DEMO"  # Key required to play GE (string)
 SYSKEY = "SYSOP"  # Key required for sysop powers (string)
@@ -190,70 +284,6 @@ HYPDST2 = 10  # Min Cybertron Hyperwarp distance (range 1-32000)
 TEAMBONU = 5  # Team bonus added for each plyr (range 0-32000)
 TEAMMAX = 10  # Maximum members on a team (range 0-32000)
 S00PLNUM = 6  # Number of Planets in Sector 0 0 (range 3-9)
-S00P1DEF = true  # Is planet #1 defined (yes/no)
-S00P2DEF = true  # Is planet #2 defined (yes/no)
-S00P3DEF = true  # Is planet #3 defined (yes/no)
-S00P4DEF = true  # Is planet #4 defined (yes/no)
-S00P5DEF = true  # Is planet #5 defined (yes/no)
-S00P6DEF = true  # Is planet #6 defined (yes/no)
-S00P7DEF = false  # Is planet #7 defined (yes/no)
-S00P8DEF = false  # Is planet #8 defined (yes/no)
-S00P9DEF = false  # Is planet #9 defined (yes/no)
-ITMPL15 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL16 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL17 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL18 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL19 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL20 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL21 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL22 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL23 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL24 = 0  # Reserved for expansion (range 0-2147483647)
-ITMPL25 = 0  # Reserved for expansion (range 0-2147483647)
-ITMWT15 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT16 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT17 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT18 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT19 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT20 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT21 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT22 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT23 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT24 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMWT25 = 0  # Weight of 100 Reserved (range 0-2147483647)
-ITMVAL15 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL16 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL17 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL18 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL19 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL20 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL21 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL22 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL23 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL24 = 0  # Point Value of Reserved (range 0-201288837)
-ITMVAL25 = 0  # Point Value of Reserved (range 0-201288837)
-ITMMH15 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH16 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH17 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH18 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH19 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH20 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH21 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH22 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH23 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH24 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMMH25 = 0  # 10K ManWeeks of work creates n Reserved (range 0-201288837)
-ITMPR15 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR16 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR17 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR18 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR19 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR20 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR21 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR22 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR23 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR24 = 1  # Base price for <reserved> (range 1-32000)
-ITMPR25 = 1  # Base price for <reserved> (range 1-32000)
 PLTVDIV = 10000  # The divisor for each ITMVLnn (range 1-201288837)
 PLTVCASH = 10  # The point value of each 1,000,000 (range 1-201288837)
 PLATTRF1 = 18  # Max percent of fighters killed by troops (range 5-100)
