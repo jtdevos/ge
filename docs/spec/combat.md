@@ -44,8 +44,10 @@ via percent=1... focus width 0–5 degrees).
   `1 + max_tons/15000`, and by the victim's `damage_factor`.
 - Ships in hyperspace can only be hit if the shooter's phaser mark ≥
   `PHATOWRP` (config), and take half damage.
-- Firing drops your shields for the shot (auto down/up), is impossible
-  while cloaked, and cannot target ships in the neutral zone.
+- Firing with shields up drops them (`shielddn`, GEFUNCS.C:2419 — a
+  plain state change; they are **not** re-raised afterwards, as the
+  original docs warn), is impossible while cloaked, and cannot target
+  ships in the neutral zone.
 - Phaser mark 20 is the sysop weapon: flat 101 damage (instant kill).
 - Victim's shields, if up, absorb per **shieldhit** below; otherwise
   full hull damage plus a random-system-damage roll.
@@ -176,7 +178,8 @@ charging/up.
   falls ≤ 2 the shields are *damaged* (status SHIELDDM, extra 3×knock)
   and must repair (type units/tick back toward 0, then down).
 - Shields auto-drop in hyperspace, when energy < `SHMINPWR`, and
-  momentarily whenever you fire torpedoes/missiles/phasers.
+  whenever you fire torpedoes/missiles/phasers — and stay down until
+  raised again (charge is kept; `shi up` is instant while charged).
 - With shields up, weapon hull damage uses the reduced "shields up"
   formulas above; the flat `SHHITENG` (1000) energy drain constant
   exists but the shield energy cost is the per-tick charge cost.
