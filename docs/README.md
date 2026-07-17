@@ -15,7 +15,15 @@ Everything needed to pick this project up cold, in reading order:
    [universe](spec/universe.md) · [combat](spec/combat.md) ·
    [economy](spec/economy.md) · [cyborgs](spec/cyborgs.md) ·
    [meta](spec/meta.md) · [commands](spec/commands.md)
+5. [original/](original/) — the recovered original player docs,
+   transcribed verbatim: the 1994 Users Guide and the in-game help.
+6. [manual/](manual/) — the reconstructed players manual: the
+   original docs merged, corrected against source and shipped data,
+   and completed — written from the original game's perspective. This
+   is the remake's target player experience, and the eventual source
+   for its in-game help text.
 
-The original author's own documentation (user guide, sysop guide,
-installation) is preserved untouched in `mbmgemp/GE/DOCS/` and
-`mbmgemp/*.DOC`.
+The original author's own files (user guide, sysop guide,
+installation) remain untouched in `mbmgemp/GE/DOCS/` and
+`mbmgemp/*.DOC`; `docs/original/` is the readable mirror of the
+player-facing ones.
