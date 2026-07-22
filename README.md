@@ -39,9 +39,10 @@ as it goes. The approach so far:
   SQLite persistence. Design decisions, rationale, and the current
   roadmap live in [docs/architecture.md](docs/architecture.md).
 
-**Start reading at [docs/](docs/README.md).** The docs are written so
-that the repository itself is all the context anyone (human or AI)
-needs to continue the work.
+**Full documentation, including a reconstructed player's manual,
+starts at [docs/](docs/README.md).** The docs are written so that the
+repository itself is all the context anyone (human or AI) needs to
+continue the work.
 
 ## Next steps
 
