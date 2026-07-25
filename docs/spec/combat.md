@@ -29,9 +29,12 @@ systems tick unless noted.
 `pha <deg> [focus]`, relative bearing −180..180, focus 0–5 (default 1
 via percent=1... focus width 0–5 degrees).
 
-- Charge: `phasr` 0–100%, reloads `PRELOAD` (10) per tick, consuming
-  `PENGUSE` (57) energy per reload tick. Must be ≥ `PMINFIRE` (60) to
-  fire. Firing dumps the whole charge (`phasr → 0`).
+- Charge: `phasr` 0–100%, reloads `phasrtype × PRELOAD` (10) per tick
+  (a damaged, negative `phasr` instead ticks back up 1/tick), consuming
+  `PENGUSE` (57) energy per reload tick — skipped if that can't be
+  afforded. Must be ≥ `PMINFIRE` (60) to fire. Firing dumps the whole
+  charge (`phasr → 0`); firing on too little charge (`NOFIREP`) or in
+  the neutral zone (self-zap, below) leaves the charge untouched.
 - Firing is a **beam sweep**: every ship in the game whose bearing from
   the shooter is within `focus + PHABIAS` (2°) of the fire direction is
   a potential hit (no explicit range gate — the distance falloff does
@@ -39,9 +42,12 @@ via percent=1... focus width 0–5 degrees).
 - Base damage `pdamage`: `dam = PDAMMAX × (1 − dist/reach)^PFIRDST ×
   (1 − focus/11)² × charge%`, where `reach = 20000 + phasertype×4000`
   units and `PFIRDST` (config "Phaser distance factor", default per
-  MSG) is the falloff exponent. Then scaled by
-  `(1 + phasertype)/2.5`, divided by target-size factor
-  `1 + max_tons/15000`, and by the victim's `damage_factor`.
+  MSG) is the falloff exponent. Then scaled by `(1 + phasertype)/2.5`
+  and divided by target-size factor `1 + max_tons/15000`. Unlike
+  torpedoes/missiles, phaser damage is **not** scaled by the victim's
+  `damage_factor` (GECMDS.C's `firep()`/`pdamage()` never reference
+  it — the affected-by-damfact wording in an earlier draft of this doc
+  was wrong).
 - Ships in hyperspace can only be hit if the shooter's phaser mark ≥
   `PHATOWRP` (config), and take half damage.
 - Firing with shields up drops them (`shielddn`, GEFUNCS.C:2419 — a
@@ -49,8 +55,10 @@ via percent=1... focus width 0–5 degrees).
   original docs warn), is impossible while cloaked, and cannot target
   ships in the neutral zone.
 - Phaser mark 20 is the sysop weapon: flat 101 damage (instant kill).
-- Victim's shields, if up, absorb per **shieldhit** below; otherwise
-  full hull damage plus a random-system-damage roll.
+- Victim's shields, if up, **fully absorb** a phaser hit — no hull
+  damage at all, just a **shieldhit** (below) knock to shield charge.
+  Shields down: full hull damage. Either way, a hit (`dam ≥ 1`) also
+  rolls random system damage.
 
 ## Hyper-phasers (in hyperspace)
 
