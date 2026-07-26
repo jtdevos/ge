@@ -71,6 +71,10 @@ via percent=1... focus width 0–5 degrees).
 - Damage: `HPDAMMAX × (1 − dist/40000)^HPFIRDST`, scaled by
   `phasertype`, divided by target size factor; no shield interaction
   (shields can't be up in hyper).
+- Unlike normal-space phasers: no cloak check, and no minimum-damage
+  gate — anything caught in beam and scan range takes a hit, even a
+  0-damage one. A miss (outside beam or range) sends no message at
+  all, since the sweep never touches `pdamage()` for it.
 
 ## Torpedoes
 
