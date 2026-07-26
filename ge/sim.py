@@ -13,9 +13,9 @@ Deliberately synchronous and deterministic: the caller (an asyncio
 runner, a test) calls tick() once per game second. All randomness goes
 through the injected RNG.
 
-Not yet ported (next milestones): firing commands (phasers/torps/
-missiles), mines/zippers, scanning, planet economy tick, cyborg AI,
-scoring/killem loot.
+Not yet ported (next milestones): hyper-phasers, torpedoes/missiles,
+mines/zippers, scanning, planet economy tick, cyborg AI, scoring/
+killem loot.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from random import Random
 from .data import GameData, I_FLUXPOD
 from .events import Event, Scope, Visibility
 from .geometry import (Coord, cbearing, cdistance, normal, samesect,
-                       sector_of)
+                       sector_of, smallest, vector)
 from .models import (ShieldStat, Ship, Status, Wormhole, WHERE_HYPER,
                      WHERE_NORMAL, WHERE_ORBIT_BASE)
 from .universe import Universe
@@ -214,6 +214,34 @@ class Sim:
         ship.destruct = self.d.const.COUNTDOWN
         return None
 
+    def order_phaser(self, ship: Ship, degrees: int, focus: int = 1) -> str | None:
+        """firep(): fire phasers in normal space, relative bearing, focus
+        0-5. Mirrors GECMDS.C's firep() only — the where==1 dispatch to
+        hyper-phasers (firehp) and margv validation both live in
+        cmd_phas(), a session-layer concern not yet built."""
+        if self.cls(ship).max_phaser_type == 0:
+            return "PHASER0"
+        if ship.phasrtype <= 0:
+            return "PHA01"
+        if ship.cloak > 0:
+            return "PCLOKUP"
+        # a fire attempt always drops shields, even if this shot then
+        # fizzles for lack of charge — and per GEFUNCS.C:2419 they are
+        # never re-raised afterwards (see docs/spec/combat.md)
+        if ship.shieldstat == ShieldStat.UP:
+            self._emit("SHLDDN", Scope.SELF, FILTER, ship=ship.id)
+            ship.shieldstat = ShieldStat.DOWN
+        if ship.phasr < self.d.const.PMINFIRE:
+            self._emit("NOFIREP", Scope.SELF, ALWAYS, ship=ship.id)
+            return None
+        if self.universe.neutral(ship.coord):
+            self._emit("ZAPHIM1", Scope.SELF, ALWAYS, ship=ship.id)
+            ship.damage += self.d.cfg.SE100DAM
+            return None
+        self._firephasers(ship, degrees, focus)
+        ship.phasr = 0.0
+        return None
+
     def order_abort(self, ship: Ship) -> str | None:
         """cmd_abort(): cancel self-destruct."""
         if ship.destruct <= 0:
@@ -230,6 +258,83 @@ class Sim:
             self._emit("LEAVEORB", Scope.SELF, ALWAYS, ship=ship.id)
             ship.where = WHERE_NORMAL
             ship.repair = 0
+
+    # -- firing (GECMDS.C) --------------------------------------------------
+
+    def _firephasers(self, ship: Ship, degrees: int, focus: int) -> None:
+        """The beam sweep in firep(): every ship within focus+PHABIAS
+        degrees of the fire direction is a potential hit."""
+        C, cfg = self.d.const, self.d.cfg
+        deg = normal(ship.heading + degrees)
+        self._emit("PFIRED", Scope.SELF, FILTER, ship=ship.id,
+                   charge=int(ship.phasr), focus=focus)
+        ship.cantexit = C.FIRETICKS
+        for target in self.ships.values():
+            if target.id == ship.id or not target.in_game():
+                continue
+            if target.where == WHERE_HYPER and ship.phasrtype < cfg.PHATOWRP:
+                continue
+            if self.universe.neutral(target.coord):
+                continue
+            bearing = vector(ship.coord, target.coord)
+            if smallest(bearing, deg) >= focus + C.PHABIAS:
+                continue
+            dam = self._phaser_damage(ship, target, focus)
+            if dam < 1:
+                continue
+            target.lastfired = ship.id
+            target.cantexit = C.FIRETICKS
+            ship.cantexit = C.FIRETICKS
+            if target.shieldstat != ShieldStat.UP:
+                target.damage += dam
+                self._emit("PHITHIM", Scope.SELF, ALWAYS, ship=ship.id,
+                           dam=dam, shipname=target.shipname)
+                self._emit("PHITYOU", Scope.SELF, ALWAYS, ship=target.id,
+                           dam=dam, shipname=ship.shipname)
+            else:
+                self._shieldhit(target, dam)
+                self._emit("PDEFLECT", Scope.SELF, ALWAYS, ship=ship.id,
+                           shipname=target.shipname)
+                self._emit("PHITDEF", Scope.SELF, ALWAYS, ship=target.id,
+                           dam=dam, shipname=ship.shipname)
+            self._randamage(target)
+
+    def _phaser_damage(self, ship: Ship, target: Ship, focus: int) -> int:
+        """pdamage() + firep()'s post-scaling: falloff by distance/focus/
+        charge, then by shooter mark, target tonnage, and hyperspace."""
+        C, cfg = self.d.const, self.d.cfg
+        dist = cdistance(ship.coord, target.coord) * 10000.0
+        reach = 20000.0 + ship.phasrtype * 4000.0
+        dd = max(1.0 - dist / reach, 0.0)
+        fd = 1.0 - focus / 11.0
+        dam = int(cfg.PDAMMAX * (dd ** cfg.PFIRDST) * (fd * fd)
+                  * (ship.phasr / 100.0))
+        factor = (dam * ((1 + ship.phasrtype) / 2.5)
+                  / (1.0 + self.cls(target).max_tonnage / C.TONFACT))
+        if target.where == WHERE_HYPER:
+            factor /= 2.0
+        dam = int(factor)
+        if ship.phasrtype == 20:      # sysop weapon: instant kill
+            dam = 101
+        return dam
+
+    def _phasrstat(self, ship: Ship) -> None:
+        """Phaser reload each systems tick (the preload block in
+        checkdam()); self-repairs from a damaged (negative) state first."""
+        C = self.d.const
+        if ship.phasr < 0:
+            ship.phasr += 1
+            if ship.phasr == 0:
+                self._emit("PHREPR", Scope.SELF, ALWAYS, ship=ship.id)
+        elif ship.phasr < 100:
+            if self._useenergy(ship, C.PENGUSE):
+                preload = ship.phasrtype * C.PRELOAD
+                if ship.phasr < C.PMINFIRE <= ship.phasr + preload:
+                    self._emit("PHSRUP", Scope.SELF, ALWAYS, ship=ship.id)
+                ship.phasr += preload
+                if ship.phasr >= 100:
+                    ship.phasr = 100.0
+                    self._emit("PHSRMAX", Scope.SELF, ALWAYS, ship=ship.id)
 
     # -- the tick loop -----------------------------------------------------
 
@@ -254,6 +359,7 @@ class Sim:
                     self._repairship(ship)
                     self._shieldstat(ship)
                     self._cloakstat(ship)
+                    self._phasrstat(ship)
                     self._checktm(ship)
                     self._recharge(ship)
                     self._checkdam(ship)
