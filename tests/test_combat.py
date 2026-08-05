@@ -4,7 +4,7 @@ from random import Random
 import pytest
 
 from ge.geometry import Coord
-from ge.models import Sector, ShieldStat
+from ge.models import Sector, ShieldStat, WHERE_HYPER
 from ge.sim import Sim
 
 
@@ -107,3 +107,64 @@ def test_phaser_recharges_after_firing(sim, shooter, target):
         sim.tick()
     assert shooter.phasr == pytest.approx(shooter.phasrtype * sim.d.const.PRELOAD)
     assert shooter.phasr > 0.0
+
+
+def test_hyperphaser_hits_and_damages_target(sim, shooter, target):
+    shooter.where = target.where = WHERE_HYPER
+    assert sim.order_hyperphaser(shooter, 0) is None
+    evs = sim.drain_events()
+    assert "HPHITM" in keys(evs)
+    assert "HPHITU" in keys(evs)
+    assert target.damage > 0
+    assert target.lastfired == shooter.id
+    assert shooter.cantexit == sim.d.const.FIRETICKS
+    assert target.cantexit == sim.d.const.FIRETICKS
+    assert shooter.energy == 50000.0 - sim.d.const.HPFIRAMT
+    assert shooter.hypha == 1
+
+
+def test_hyperphaser_ignores_ship_in_normal_space(sim, shooter, target):
+    shooter.where = WHERE_HYPER   # target stays in normal space
+    assert sim.order_hyperphaser(shooter, 0) is None
+    evs = sim.drain_events()
+    assert "HPHITM" not in keys(evs)
+    assert target.damage == 0.0
+
+
+def test_hyperphaser_misses_outside_beam_width(sim, shooter, target):
+    shooter.where = target.where = WHERE_HYPER
+    target.coord = Coord(100.5, 100.49)   # north of the shooter, not east
+    assert sim.order_hyperphaser(shooter, 0) is None
+    evs = sim.drain_events()
+    assert "HPHITM" not in keys(evs)
+    assert target.damage == 0.0
+
+
+def test_hyperphaser_misses_outside_scan_range(sim, shooter, target):
+    shooter.where = target.where = WHERE_HYPER
+    target.coord = Coord(120.5, 100.5)   # ~20 sector-units east: past scan range
+    assert sim.order_hyperphaser(shooter, 0) is None
+    evs = sim.drain_events()
+    assert "HPHITM" not in keys(evs)
+    assert target.damage == 0.0
+
+
+def test_hyperphaser_needs_minimum_energy(sim, shooter, target):
+    shooter.where = target.where = WHERE_HYPER
+    shooter.energy = 1000.0
+    assert sim.order_hyperphaser(shooter, 0) is None
+    evs = sim.drain_events()
+    assert "HNOFIRP" in keys(evs)
+    assert target.damage == 0.0
+    assert shooter.energy == 1000.0
+    assert shooter.hypha == 0
+
+
+def test_hyperphaser_in_neutral_zone_zaps_the_shooter(sim, shooter, target):
+    shooter.where = WHERE_HYPER
+    shooter.coord = sim.universe.get_sector_xy(0, 0).objects[0].coord.copy()
+    assert sim.order_hyperphaser(shooter, 0) is None
+    evs = sim.drain_events()
+    assert "ZAPHIM1" in keys(evs)
+    assert shooter.damage == sim.d.cfg.SE100DAM
+    assert shooter.energy == 50000.0       # early return: energy not spent

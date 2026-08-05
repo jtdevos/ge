@@ -13,9 +13,8 @@ Deliberately synchronous and deterministic: the caller (an asyncio
 runner, a test) calls tick() once per game second. All randomness goes
 through the injected RNG.
 
-Not yet ported (next milestones): hyper-phasers, torpedoes/missiles,
-mines/zippers, scanning, planet economy tick, cyborg AI, scoring/
-killem loot.
+Not yet ported (next milestones): torpedoes/missiles, mines/zippers,
+scanning, planet economy tick, cyborg AI, scoring/killem loot.
 """
 
 from __future__ import annotations
@@ -235,11 +234,25 @@ class Sim:
             self._emit("NOFIREP", Scope.SELF, ALWAYS, ship=ship.id)
             return None
         if self.universe.neutral(ship.coord):
-            self._emit("ZAPHIM1", Scope.SELF, ALWAYS, ship=ship.id)
-            ship.damage += self.d.cfg.SE100DAM
+            self._zaphim(ship)
             return None
         self._firephasers(ship, degrees, focus)
         ship.phasr = 0.0
+        return None
+
+    def order_hyperphaser(self, ship: Ship, degrees: int) -> str | None:
+        """firehp(): fire hyper-phasers, relative bearing. Mirrors
+        GECMDS.C's firehp() only — the where==1 dispatch and the
+        hypha==0 ("still cooling down") gate both live in cmd_phas(), a
+        session-layer concern not yet built."""
+        C, cfg = self.d.const, self.d.cfg
+        if ship.energy < C.HPMINFIR:
+            self._emit("HNOFIRP", Scope.SELF, ALWAYS, ship=ship.id)
+            return None
+        if self.universe.neutral(ship.coord):
+            self._zaphim(ship)
+            return None
+        self._firehyperphasers(ship, degrees)
         return None
 
     def order_abort(self, ship: Ship) -> str | None:
@@ -260,6 +273,11 @@ class Sim:
             ship.repair = 0
 
     # -- firing (GECMDS.C) --------------------------------------------------
+
+    def _zaphim(self, ship: Ship) -> None:
+        """zaphim(): firing from the neutral zone zaps the firer instead."""
+        self._emit("ZAPHIM1", Scope.SELF, ALWAYS, ship=ship.id)
+        ship.damage += self.d.cfg.SE100DAM
 
     def _firephasers(self, ship: Ship, degrees: int, focus: int) -> None:
         """The beam sweep in firep(): every ship within focus+PHABIAS
@@ -313,6 +331,57 @@ class Sim:
                   / (1.0 + self.cls(target).max_tonnage / C.TONFACT))
         if target.where == WHERE_HYPER:
             factor /= 2.0
+        dam = int(factor)
+        if ship.phasrtype == 20:      # sysop weapon: instant kill
+            dam = 101
+        return dam
+
+    def _firehyperphasers(self, ship: Ship, degrees: int) -> None:
+        """The beam sweep in firehp(): fixed HPBEAMW-degree beam, hits only
+        ships also in hyperspace and within the shooter's scan range.
+        Unlike firep(), there's no cloak check, no shield interaction, and
+        no minimum-damage gate — any target caught in beam and range takes
+        a hit, even a 0-damage one."""
+        C, cfg = self.d.const, self.d.cfg
+        deg = normal(ship.heading + degrees)
+        self._emit("HPFIRED", Scope.SELF, FILTER, ship=ship.id, degrees=deg)
+        ship.energy -= C.HPFIRAMT
+        ship.hypha = 1
+        ship.cantexit = C.FIRETICKS
+        scan_range = self.cls(ship).scan_range
+        for target in self.ships.values():
+            if target.id == ship.id or not target.in_game():
+                continue
+            if target.where != WHERE_HYPER:
+                continue
+            if self.universe.neutral(target.coord):
+                continue
+            bearing = vector(ship.coord, target.coord)
+            if smallest(bearing, deg) >= C.HPBEAMW:
+                continue
+            dist = cdistance(ship.coord, target.coord) * 10000.0
+            if dist >= scan_range:
+                continue
+            dam = self._hyperphaser_damage(ship, target, dist)
+            target.lastfired = ship.id
+            target.cantexit = C.FIRETICKS
+            ship.cantexit = C.FIRETICKS
+            target.damage += dam
+            self._emit("HPHITM", Scope.SELF, ALWAYS, ship=ship.id,
+                       dam=dam, shipname=target.shipname)
+            self._emit("HPHITU", Scope.SELF, ALWAYS, ship=target.id,
+                       dam=dam, shipname=ship.shipname)
+            self._randamage(target)
+
+    def _hyperphaser_damage(self, ship: Ship, target: Ship, dist: float) -> int:
+        """pdamage()'s where==1 branch + firehp()'s post-scaling: falloff
+        over a fixed 40000-unit range, scaled by shooter mark and divided
+        by target tonnage. No focus term, no charge term, no /2.5 shift."""
+        C, cfg = self.d.const, self.d.cfg
+        dd = max(1.0 - dist / 40000.0, 0.0)
+        dam = int(cfg.HPDAMMAX * (dd ** cfg.HPFIRDST))
+        factor = (dam * ship.phasrtype
+                  / (1.0 + self.cls(target).max_tonnage / C.TONFACT))
         dam = int(factor)
         if ship.phasrtype == 20:      # sysop weapon: instant kill
             dam = 101

@@ -92,12 +92,13 @@ blowouts, universe edge, gravity and wormhole transit, energy/flux,
 shields (charge/hit/repair), cloak, incoming torpedoes/missiles with
 decoys, jammer/battle-lock countdowns, self-destruct, random system
 damage, death (minus kill rewards), normal-space phasers (charge/
-reload, beam sweep, shield deflection).
+reload, beam sweep, shield deflection), hyper-phasers (beam sweep,
+scan-range gate).
 
 Next milestones (in rough order; TODOs in `ge/sim.py`):
 
-1. Rest of the firing side of combat: hyper-phasers, lock-on rolls,
-   torpedo/missile launch, mines, zippers ([combat spec](spec/combat.md))
+1. Rest of the firing side of combat: lock-on rolls, torpedo/missile
+   launch, mines, zippers ([combat spec](spec/combat.md))
 2. `killem()` kill rewards: loot, scoring, planet-map capture
 3. Scanning (`sca se/ra/pl/sh`) and reports — first presentation-layer
    consumers
