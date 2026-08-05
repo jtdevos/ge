@@ -13,7 +13,8 @@ Deliberately synchronous and deterministic: the caller (an asyncio
 runner, a test) calls tick() once per game second. All randomness goes
 through the injected RNG.
 
-Not yet ported (next milestones): torpedoes/missiles, mines/zippers,
+Not yet ported (next milestones): torpedo/missile launch commands
+(the lock-on roll they share is ported as `_lockon`), mines/zippers,
 scanning, planet economy tick, cyborg AI, scoring/killem loot.
 """
 
@@ -32,6 +33,10 @@ from .universe import Universe
 
 ALWAYS = Visibility.ALWAYS
 FILTER = Visibility.FILTER
+
+# lockon() weapon kind
+LOCKON_TORPEDO = 0
+LOCKON_MISSILE = 1
 
 
 class Sim:
@@ -386,6 +391,52 @@ class Sim:
         if ship.phasrtype == 20:      # sysop weapon: instant kill
             dam = 101
         return dam
+
+    def _lockon(self, ship: Ship, target: Ship, kind: int) -> bool:
+        """lockon(): the fire-control roll shared by torpedo and missile
+        launch (GECMDS.C's torp()/cmd_missl() dispatch here before
+        spawning a chaser — those launch commands themselves aren't
+        ported yet). `kind` is LOCKON_TORPEDO or LOCKON_MISSILE.
+
+        Fails outright (no battle-lock either side) if fire control is
+        damaged, the shooter is jammed, or the target is in the neutral
+        zone. Otherwise rolls a lock factor from range (and, for
+        torpedoes, combined speed) and always battle-locks both ships,
+        win or lose, once the target is found in scan range."""
+        C, cfg = self.d.const, self.d.cfg
+        if ship.firecntl > 0:
+            self._emit("FCBROKE", Scope.SELF, ALWAYS, ship=ship.id)
+            return False
+        if ship.jammer > 0:
+            self._emit("JAMMER4", Scope.SELF, ALWAYS, ship=ship.id)
+            return False
+        if self.universe.neutral(target.coord):
+            self._emit("FCNONO", Scope.SELF, ALWAYS, ship=ship.id)
+            return False
+        dist = cdistance(ship.coord, target.coord)
+        if target.cloak >= 10 or dist * 10000.0 >= self.cls(ship).scan_range:
+            self._emit("LOCK5", Scope.SELF, ALWAYS, ship=ship.id,
+                       shipname=target.shipname)
+            return False
+        if kind == LOCKON_TORPEDO:
+            if target.speed > 999:
+                fact = 0.0
+            else:
+                speed = ship.speed + target.speed
+                fact = (1.2 - speed / 5000.0) * ((5.0 - dist) / (cfg.TORFACT / 10.0))
+        else:
+            fact = (5.0 - dist) / (cfg.MISFACT / 10.0)
+        target.cantexit = C.FIRETICKS
+        ship.cantexit = C.FIRETICKS
+        if fact > 0.7:
+            self._emit("LOCK2", Scope.SELF, FILTER, ship=target.id,
+                       shipname=ship.shipname)
+            return True
+        self._emit("LOCK3", Scope.SELF, FILTER, ship=ship.id,
+                   shipname=target.shipname)
+        self._emit("LOCK4", Scope.SELF, FILTER, ship=target.id,
+                   shipname=ship.shipname)
+        return False
 
     def _phasrstat(self, ship: Ship) -> None:
         """Phaser reload each systems tick (the preload block in
