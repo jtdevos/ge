@@ -5,7 +5,7 @@ import pytest
 
 from ge.geometry import Coord
 from ge.models import Sector, ShieldStat, WHERE_HYPER
-from ge.sim import Sim
+from ge.sim import LOCKON_MISSILE, LOCKON_TORPEDO, Sim
 
 
 @pytest.fixture
@@ -168,3 +168,70 @@ def test_hyperphaser_in_neutral_zone_zaps_the_shooter(sim, shooter, target):
     assert "ZAPHIM1" in keys(evs)
     assert shooter.damage == sim.d.cfg.SE100DAM
     assert shooter.energy == 50000.0       # early return: energy not spent
+
+
+def test_lockon_succeeds_at_close_range(sim, shooter, target):
+    assert sim._lockon(shooter, target, LOCKON_TORPEDO) is True
+    evs = sim.drain_events()
+    assert "LOCK2" in keys(evs)
+    assert shooter.cantexit == sim.d.const.FIRETICKS
+    assert target.cantexit == sim.d.const.FIRETICKS
+
+
+def test_lockon_fails_at_marginal_range_but_still_battle_locks(sim, shooter, target):
+    target.coord = Coord(104.5, 100.5)   # 4 sectors out: in range, weak lock
+    assert sim._lockon(shooter, target, LOCKON_TORPEDO) is False
+    evs = sim.drain_events()
+    assert "LOCK3" in keys(evs)
+    assert "LOCK4" in keys(evs)
+    assert shooter.cantexit == sim.d.const.FIRETICKS
+    assert target.cantexit == sim.d.const.FIRETICKS
+
+
+def test_lockon_missile_uses_its_own_factor(sim, shooter, target):
+    target.coord = Coord(104.5, 100.5)   # fails missile lock too at this range
+    assert sim._lockon(shooter, target, LOCKON_MISSILE) is False
+    assert "LOCK3" in keys(sim.drain_events())
+
+
+def test_lockon_torpedo_cannot_catch_a_fast_target(sim, shooter, target):
+    target.speed = 1500.0                # above warp 1
+    assert sim._lockon(shooter, target, LOCKON_TORPEDO) is False
+    evs = sim.drain_events()
+    assert "LOCK3" in keys(evs)
+    assert shooter.cantexit == sim.d.const.FIRETICKS   # still battle-locked
+
+
+def test_lockon_fails_outside_scan_range(sim, shooter, target):
+    target.coord = Coord(111.5, 100.5)   # 11 sectors: past class-1 scan range
+    assert sim._lockon(shooter, target, LOCKON_TORPEDO) is False
+    evs = sim.drain_events()
+    assert "LOCK5" in keys(evs)
+    assert shooter.cantexit == 0         # no battle lock: never found the target
+    assert target.cantexit == 0
+
+
+def test_lockon_fails_against_fully_cloaked_target(sim, shooter, target):
+    target.cloak = 10
+    assert sim._lockon(shooter, target, LOCKON_TORPEDO) is False
+    assert "LOCK5" in keys(sim.drain_events())
+
+
+def test_lockon_refuses_target_in_neutral_zone(sim, shooter, target):
+    target.coord = sim.universe.get_sector_xy(0, 0).objects[0].coord.copy()
+    assert sim._lockon(shooter, target, LOCKON_TORPEDO) is False
+    evs = sim.drain_events()
+    assert "FCNONO" in keys(evs)
+    assert shooter.cantexit == 0
+
+
+def test_lockon_refuses_with_broken_fire_control(sim, shooter, target):
+    shooter.firecntl = 1
+    assert sim._lockon(shooter, target, LOCKON_TORPEDO) is False
+    assert "FCBROKE" in keys(sim.drain_events())
+
+
+def test_lockon_refuses_while_jammed(sim, shooter, target):
+    shooter.jammer = 1
+    assert sim._lockon(shooter, target, LOCKON_TORPEDO) is False
+    assert "JAMMER4" in keys(sim.drain_events())
